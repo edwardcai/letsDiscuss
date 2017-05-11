@@ -1,0 +1,123 @@
+h1 {
+  color: blue;
+}
+
+.green{
+  color: green;
+}
+
+form {
+  display: inline-block;
+}
+
+#chat-container{
+  height: 500px;
+  background-color: #f7f7f7;
+  overflow: scroll;
+  padding-bottom:50px;
+}
+
+.inline-block{
+  display: inline-block;
+  width: 100%;
+  margin-bottom:5px;
+}
+
+.received-msg{
+  background-color: #ffffff;
+  width: fit-content;
+  max-width: 60%;
+  border-radius: 10px ;
+  white-space: normal; 
+  display: inline-block;
+  padding: 1px;
+}
+
+.panel-body{
+  padding: 8px
+}
+
+.sent-msg{
+  display: inline-block;
+  background-color: #4286f4;
+  color: white;
+  max-width: 60%;
+  width: fit-content;
+  white-space: normal;  
+  float: right;
+  border-radius: 10px ;
+}
+
+@keyframes blink {
+    /**
+     * At the start of the animation the dot
+     * has an opacity of .2
+     */
+    0% {
+      opacity: .2;
+    }
+    /**
+     * At 20% the dot is fully visible and
+     * then fades out slowly
+     */
+    20% {
+      opacity: 1;
+    }
+    /**
+     * Until it reaches an opacity of .2 and
+     * the animation can start again
+     */
+    100% {
+      opacity: .2;
+    }
+}
+
+.saving span {
+    /**
+     * Use the blink animation, which is defined above
+     */
+    animation-name: blink;
+    /**
+     * The animation should take 1.4 seconds
+     */
+    animation-duration: 1.4s;
+    /**
+     * It will repeat itself forever
+     */
+    animation-iteration-count: infinite;
+    /**
+     * This makes sure that the starting style (opacity: .2)
+     * of the animation is applied before the animation starts.
+     * Otherwise we would see a short flash or would have
+     * to set the default styling of the dots to the same
+     * as the animation. Same applies for the ending styles.
+     */
+    animation-fill-mode: both;
+}
+
+.saving span:nth-child(2) {
+    /**
+     * Starts the animation of the third dot
+     * with a delay of .2s, otherwise all dots
+     * would animate at the same time
+     */
+    animation-delay: .2s;
+}
+
+#loading{
+	display: none;
+}
+
+.saving{
+	line-height: 1px;
+	font-size: 200%;
+}
+.saving span:nth-child(3) {
+    /**
+     * Starts the animation of the third dot
+     * with a delay of .4s, otherwise all dots
+     * would animate at the same time
+     */
+    animation-delay: .4s;
+    height: 50%;
+}
