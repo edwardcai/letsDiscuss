@@ -1,6 +1,9 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.contrib import messages
+import json
+
+from django.contrib.sessions.backends.db import SessionStore
 
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -8,13 +11,24 @@ from django.urls import reverse
 from app.dialogue.dialogue import *
 
 def index(request):
-	request.session.set_expiry(0)
-        request.session['dialogue'] = Dialogue()
+	request.session['dialogue'] = Dialogue()
 	return render(request, 'app/index.html')
 
 @csrf_exempt
+def init(request):
+	request.session['dialogue'] = Dialogue()
+
+	return HttpResponse("meow", content_type='text/plain')
+
+@csrf_exempt
+def next(request):
+	query = json.loads(request.body)["text"]
+	dialogue = request.session['dialogue']
+	(response, topic) = dialogue.getResponse(query)
+	return HttpResponse(response, content_type='text/plain')
+
+@csrf_exempt
 def query(request):
-	request.session.set_expiry(0)
 
 	'''View for responding to queries'''
 	query = request.POST['query']

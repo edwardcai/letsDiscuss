@@ -42,7 +42,7 @@ class LdaModel:
 		tokens = nltk.word_tokenize(review.lower())
 		stopped_tokens = [i for i in tokens if not i in self.stop_words]
 		stemmed_tokens = [self.stemmer.stem(i) for i in stopped_tokens]
-		#print(stemmed_tokens)
+		print(stemmed_tokens)
 		bow = self.dictionary.doc2bow(stemmed_tokens)
 		return ldamodel.get_document_topics(bow, minimum_probability=0)
 

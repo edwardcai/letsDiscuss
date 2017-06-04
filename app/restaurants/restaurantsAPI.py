@@ -7,7 +7,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-from app.restaurants.yelpAPI import loadComments
+import app.restaurants.yelpAPI as yelpAPI
 from app.restaurants.lda.ldaModel import *
 from yelp.client import Client
 from yelp.oauth1_authenticator import Oauth1Authenticator
@@ -19,6 +19,11 @@ class RestaurantsAPI(object):
 		self._restaurant=None
 		self._ldaModel = LdaModel()
 		self._reviews = None
+		with open('app/restaurants/config_zomato.json') as config_file:
+			data = json.load(config_file)
+		self._api_key = data["api-key"]
+		self._headers = {"Accept": "application/json", "user-key": self._api_key}
+
 
 
 	def getYelpClient(self):
@@ -44,21 +49,23 @@ class RestaurantsAPI(object):
 
 	def search(self, name, city="Pittsburgh"):
 		#data consists of restaurant name and city
-		params = {
-	    	'term': name,
-	      	'limit': 1
-		}
+		data = {}
+		data['count'] = 1
+		data['q'] = name
+		if city is not None:
+			data['entity_type'] = "city"
+			data['entity_id'] = self.getLocationID(city)
 
-		results = self.getYelpClient().search(city, **params)
- 		if len(results.businesses) == 0:
+                
+
+		restaurants = self.makePOSTReq("/search", data)
+		if restaurants['results_found'] == 0:
 			return None
-		self._restaurant = results.businesses[0]
-
+		self._restaurant = restaurants['restaurants'][0]['restaurant']
 		self.loadComments()
-		if len(self._reviews) == 0:
-			return None
-		self._ldaModel.loadReviews([review[0] for review in self._reviews])
-		return self._restaurant.name
+		self._ldaModel.loadReviews(map(lambda r: r[0], self._reviews))
+
+		return self._restaurant["name"]
 
 	def getLocationID(self, city):
 	    data = {}	
@@ -69,10 +76,20 @@ class RestaurantsAPI(object):
 	    return cities["location_suggestions"][0]["id"]  
 
 	def loadComments(self):
-		
-		self._reviews = loadComments(
-			self._restaurant.name,
-			self._restaurant.location.postal_code)  
+		data = {}
+		data['res_id'] = self._restaurant['id']
+		data['count'] = 20
+ 
+		reviews = self.makePOSTReq("/reviews", data)
+		if reviews['reviews_shown'] == 0:
+			return 
+		self._reviews = list(map(lambda r: (r['review']['review_text'], r['review']['rating']), 
+			reviews['user_reviews']))
+		self._reviews.extend(yelpAPI.loadComments(
+			self._restaurant["name"],
+			self._restaurant["location"]["zipcode"]))
+
+
 
 	def makePOSTReq(self, path, data):
 		r = requests.post(self._url + path, headers = self._headers, params=data)
